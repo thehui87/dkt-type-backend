@@ -6,7 +6,9 @@ export const resetPasswordTemplate = async (
     resetToken: string,
 ) => {
     const transporter = nodemailer.createTransport({
-        service: "Gmail", // or your email service
+        host: "smtp.hostinger.com",
+        port: 465,
+        secure: true,
         auth: {
             user: process.env.EMAIL_USER,
             pass: process.env.EMAIL_PASSWORD,
