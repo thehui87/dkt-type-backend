@@ -15,7 +15,7 @@ export const resetPasswordTemplate = async (
         },
     });
 
-    const resetUrl = `https://yourapp.com/reset-password/${resetToken}`;
+    const resetUrl = `${process.env.FRONTEND_URI}/reset-password/${resetToken}`;
 
     const mailOptions = {
         from: "info@dwarfknight.com",

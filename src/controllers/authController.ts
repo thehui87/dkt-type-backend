@@ -8,6 +8,7 @@ import {
 import jwt from "jsonwebtoken";
 import { generateResetToken } from "../services/resetTokenService";
 import { resetPasswordTemplate } from "../services/emailService";
+import RefreshToken from "../models/RefreshToken";
 
 export const register = async (req: Request, res: Response) => {
     const { username, email, password, role } = req.body;
@@ -43,13 +44,21 @@ export const login = async (req: Request, res: Response) => {
             return res.status(400).send("Invalid credentials");
         }
         if (user && validPassword) {
-            // Generate access token (short-lived)
-            const accessToken = generateAccessToken(user);
-
             // Generate refresh token (long-lived)
             const refreshToken = await generateRefreshToken(user);
+            // Set the refresh token in an HttpOnly, Secure cookie
+            res.cookie("refreshToken", refreshToken, {
+                httpOnly: true, // Prevent JavaScript access
+                secure: true, // Send cookie only over HTTPS
+                sameSite: "none", // CSRF protection
+                maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days expiration
+            });
 
-            res.status(200).json({ accessToken, refreshToken });
+            // Generate access token (short-lived)
+            // Respond with the access token (which can be stored in memory or Redux)
+            res.status(200).json({ accessToken: generateAccessToken(user) });
+
+            // res.status(200).json({ accessToken, refreshToken });
         }
     } catch (error) {
         console.log(error);
@@ -58,7 +67,7 @@ export const login = async (req: Request, res: Response) => {
 };
 
 export const refreshToken = async (req: Request, res: Response) => {
-    const { refreshToken } = req.body;
+    const refreshToken = req.cookies.refreshToken;
 
     if (!refreshToken) {
         return res.status(401).json({ message: "No refresh token provided" });
@@ -129,4 +138,15 @@ export const resetPassword = async (req: Request, res: Response) => {
     } catch (error: any) {
         res.status(400).send(error.message);
     }
+};
+
+export const logout = async (req: Request, res: Response) => {
+    const refreshToken = req.cookies.refreshToken;
+    await RefreshToken.findOneAndDelete({ token: refreshToken });
+    res.clearCookie("refreshToken", {
+        httpOnly: true,
+        secure: true, // true if using HTTPS
+        sameSite: "none", // required for cross-origin requests
+    });
+    res.sendStatus(200); // Success
 };
