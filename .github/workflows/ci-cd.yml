@@ -37,5 +37,5 @@ jobs:
               run: |
                   echo "$SSH_PRIVATE_KEY" > private_key
                   chmod 600 private_key
-                  rsync -avz -e "ssh -i private_key -o StrictHostKeyChecking=no -p 4444" ./ debabrata@192.168.68.108:/etc/nginx/sites-available/dkt-type
+                  rsync -avz -e "ssh -i private_key -o StrictHostKeyChecking=no -p 22" ./ debabrata@192.168.68.108:/etc/nginx/sites-available/dkt-type
                   rm private_key
