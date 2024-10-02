@@ -20,7 +20,7 @@ npm install @types/dotenv --save-dev
 2. Login \*\*
 3. Forgot password \*\*
 4. Reset password \*\*
-5. Logout
+5. Logout \*\*
 6. Get user details \*\*
 7. Save typing data
 8. Get typing data
